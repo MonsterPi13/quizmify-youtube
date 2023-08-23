@@ -1,16 +1,24 @@
-import { redirect } from "next/navigation";
+import { redirect, useParams } from "next/navigation";
 import { getAuthSession } from "@/lib/nextauth";
+import QuizCreation from "@/components/forms/QuizCreation";
 
 export const metadata = {
   title: "Quiz | Quizmify",
 };
-async function QuizPage() {
+
+interface Props {
+  searchParams: {
+    topic?: string;
+  };
+}
+
+async function QuizPage({ searchParams }: Props) {
   const session = await getAuthSession();
-  if (session?.user) {
+  if (!session?.user) {
     return redirect("/");
   }
 
-  return <div>QuizPage</div>;
+  return <QuizCreation topic={searchParams.topic ?? ""} />;
 }
 
 export default QuizPage;
