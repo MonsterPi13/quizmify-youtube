@@ -1,8 +1,11 @@
-import { DefaultSession, NextAuthOptions, getServerSession } from "next-auth";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
+import {
+  type DefaultSession,
+  type NextAuthOptions,
+  getServerSession,
+} from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
-
-import { prisma } from "./db";
+import { prisma } from "@/lib/db";
 
 declare module "next-auth" {
   interface Session extends DefaultSession {
@@ -24,7 +27,7 @@ export const authOptions: NextAuthOptions = {
   },
   callbacks: {
     jwt: async ({ token }) => {
-      const db_user = prisma.user.findFirst({
+      const db_user = await prisma.user.findFirst({
         where: {
           email: token?.email,
         },
@@ -51,9 +54,6 @@ export const authOptions: NextAuthOptions = {
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID as string,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
-      httpOptions: {
-        timeout: 40000,
-      },
     }),
   ],
 };

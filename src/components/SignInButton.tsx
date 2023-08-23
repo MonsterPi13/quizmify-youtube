@@ -8,7 +8,7 @@ interface Props {
 }
 
 const SignInButton: React.FC<Props> = ({ text }) => {
-  return <Button onClick={() => signIn()}>{text}</Button>;
+  return <Button onClick={() => signIn("google")}>{text}</Button>;
 };
 
 export default SignInButton;
