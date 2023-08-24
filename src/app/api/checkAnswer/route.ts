@@ -36,6 +36,7 @@ export async function POST(req: Request, res: Response) {
       return NextResponse.json({
         isCorrect,
       });
+    } else if (question.questionType === "open_ended") {
     }
   } catch (error) {
     if (error instanceof ZodError) {

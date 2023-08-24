@@ -52,7 +52,7 @@ export async function POST(req: Request, res: Response) {
         status: 200,
       }
     );
-  } catch (error) {
+  } catch (error: any) {
     if (error instanceof ZodError) {
       return NextResponse.json(
         { error: error.issues },
@@ -61,7 +61,7 @@ export async function POST(req: Request, res: Response) {
         }
       );
     } else {
-      console.error("elle gpt error", error);
+      console.error("[OPENAI error]", error.response);
       return NextResponse.json(
         { error: "An unexpected error occurred." },
         {
