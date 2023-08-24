@@ -1,8 +1,12 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { BookOpen, CopyCheck } from "lucide-react";
+import { useMutation } from "@tanstack/react-query";
+import axios from "axios";
 
 import {
   Card,
@@ -24,7 +28,6 @@ import { quizCreationSchema } from "@/schemas/QuizCreation";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { BookOpen, CopyCheck } from "lucide-react";
 
 type Input = z.infer<typeof quizCreationSchema>;
 
@@ -33,6 +36,18 @@ type Props = {
 };
 
 const QuizCreation: React.FC<Props> = ({ topic: topicParam }) => {
+  const router = useRouter();
+  const { mutate: getQuestions, isLoading } = useMutation({
+    mutationFn: async ({ type, amount, topic }: Input) => {
+      const response = await axios.post("/api/game", {
+        amount,
+        topic,
+        type,
+      });
+      return response.data;
+    },
+  });
+
   const form = useForm<Input>({
     resolver: zodResolver(quizCreationSchema),
     defaultValues: {
@@ -42,7 +57,24 @@ const QuizCreation: React.FC<Props> = ({ topic: topicParam }) => {
     },
   });
 
-  const onSubmit = async (data: Input) => {};
+  const onSubmit = async (input: Input) => {
+    getQuestions(
+      {
+        amount: input.amount,
+        topic: input.topic,
+        type: input.type,
+      },
+      {
+        onSuccess: ({ gameId }) => {
+          if (input.type === "open_ended") {
+            router.push(`/play/open-ended/${gameId}`);
+          } else {
+            router.push(`/play/mcq/${gameId}`);
+          }
+        },
+      }
+    );
+  };
 
   form.watch();
 
@@ -128,7 +160,9 @@ const QuizCreation: React.FC<Props> = ({ topic: topicParam }) => {
                   <BookOpen className="w-4 h-4 mr-2" /> Open Ended
                 </Button>
               </div>
-              <Button type="submit">Submit</Button>
+              <Button disabled={isLoading} type="submit">
+                Submit
+              </Button>
             </form>
           </Form>
         </CardContent>

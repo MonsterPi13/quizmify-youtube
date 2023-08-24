@@ -17,7 +17,7 @@ export async function strict_output(
   output_value_only: boolean = false,
   model: string = "gpt-3.5-turbo",
   temperature: number = 1,
-  num_tries: number = 10,
+  num_tries: number = 3,
   verbose: boolean = false
 ): Promise<
   {
@@ -53,6 +53,16 @@ export async function strict_output(
     if (list_input) {
       output_format_prompt += `\nGenerate a list of json, one json for each input element.`;
     }
+
+    console.log("[request]", [
+      {
+        role: "system",
+        content: system_prompt + output_format_prompt + error_msg,
+      },
+      { role: "user", content: user_prompt.toString() },
+    ]);
+
+    console.log("-------------------------------");
 
     // Use OpenAI to get a response
     const response = await openai.createChatCompletion({
