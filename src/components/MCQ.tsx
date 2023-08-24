@@ -1,8 +1,13 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 import { Game, Question } from "@prisma/client";
-import { ChevronRight, Loader2, Timer } from "lucide-react";
+import { BarChart, ChevronRight, Loader2, Timer } from "lucide-react";
+import { useMutation } from "@tanstack/react-query";
+import axios from "axios";
+import { z } from "zod";
+import { differenceInSeconds } from "date-fns";
 
 import {
   Card,
@@ -10,29 +15,131 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import MCQCounter from "@/components/MCQCounter";
+import { checkAnswerSchema } from "@/schemas/questions";
+import { useToast } from "@/components/ui/use-toast";
+import { cn, formatTimeDelta } from "@/lib/utils";
 
 interface Props {
   game: Game & { questions: Pick<Question, "id" | "options" | "question">[] };
 }
 const MCQ: React.FC<Props> = ({ game }) => {
   const [questionIndex, setQuestionIndex] = useState(0);
+  const [hasEnded, setHasEnded] = useState(false);
   const [selectedChoice, setSelectedChoice] = useState(-1);
+  const [now, setNow] = useState(new Date());
   const [stats, setStats] = useState({
     correct_answers: 0,
     wrong_answers: 0,
   });
+  const { toast } = useToast();
 
   const currentQuestion = useMemo(() => {
+    console.log("[game.question]", game.questions[questionIndex]);
     return game.questions[questionIndex];
   }, [questionIndex, game]);
+
   const options = useMemo(() => {
     if (!currentQuestion) return [];
     if (!currentQuestion.options) return [];
 
     return JSON.parse(currentQuestion.options as string) as string[];
   }, [currentQuestion]);
+
+  const { mutate: checkAnswer, isLoading: isChecking } = useMutation({
+    mutationFn: async () => {
+      const payload: z.infer<typeof checkAnswerSchema> = {
+        questionId: currentQuestion.id,
+        userInput: options[selectedChoice],
+      };
+      const response = await axios.post("/api/checkAnswer", payload);
+      return response.data;
+    },
+  });
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (!hasEnded) {
+        setNow(new Date());
+      }
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [hasEnded]);
+
+  const handleNext = useCallback(() => {
+    if (isChecking) return;
+
+    checkAnswer(undefined, {
+      onSuccess: ({ isCorrect }) => {
+        if (isCorrect) {
+          setStats((stats) => ({
+            ...stats,
+            correct_answers: stats.correct_answers + 1,
+          }));
+          toast({
+            title: "Correct!",
+            variant: "success",
+            description: "You got it right!",
+          });
+        } else {
+          setStats((stats) => ({
+            ...stats,
+            wrong_answers: stats.wrong_answers + 1,
+          }));
+          toast({
+            title: "Wrong!",
+            variant: "destructive",
+            description: "You got it wrong!",
+          });
+        }
+
+        setQuestionIndex((questionIndex) => questionIndex + 1);
+      },
+    });
+  }, [checkAnswer, toast, isChecking]);
+
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      const key = event.key;
+
+      if (key === "1") {
+        setSelectedChoice(0);
+      } else if (key === "2") {
+        setSelectedChoice(1);
+      } else if (key === "3") {
+        setSelectedChoice(2);
+      } else if (key === "4") {
+        setSelectedChoice(3);
+      } else if (key === "Enter") {
+        handleNext();
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [handleNext]);
+
+  if (hasEnded) {
+    return (
+      <div className="absolute flex flex-col justify-center -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2">
+        <div className="px-4 py-2 mt-2 font-semibold text-white bg-green-500 rounded-md whitespace-nowrap">
+          You Completed in{" "}
+          {formatTimeDelta(differenceInSeconds(now, game.timeStarted))}
+        </div>
+        <Link
+          href={`/statistics/${game.id}`}
+          className={cn(buttonVariants({ size: "lg" }), "mt-2")}
+        >
+          View Statistics
+          <BarChart className="w-4 h-4 ml-2" />
+        </Link>
+      </div>
+    );
+  }
 
   return (
     <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 md:w-[80vw] w-[90vw] max-w-4xl">
@@ -47,7 +154,9 @@ const MCQ: React.FC<Props> = ({ game }) => {
           </p>
           <div className="flex self-start mt-3 text-slate-400">
             <Timer className="mr-2" />
-            <span>00:00</span>
+            <span>
+              {formatTimeDelta(differenceInSeconds(now, game.timeStarted))}
+            </span>
           </div>
         </div>
         <MCQCounter
@@ -59,7 +168,7 @@ const MCQ: React.FC<Props> = ({ game }) => {
       <Card className="w-full mt-4">
         <CardHeader className="flex flex-row items-center">
           <CardTitle className="mr-5 text-center divide-y divide-zinc-600/50">
-            <div>1</div>
+            <div>{questionIndex + 1}</div>
             <div className="text-base text-slate-400">
               {game.questions.length}
             </div>
@@ -83,11 +192,16 @@ const MCQ: React.FC<Props> = ({ game }) => {
             <div className="text-start">{option}</div>
           </Button>
         ))}
+        <Button
+          variant="default"
+          className="mt-2"
+          size="lg"
+          onClick={() => handleNext()}
+        >
+          {isChecking && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+          Next <ChevronRight className="w-4 h-4 ml-2" />
+        </Button>
       </div>
-      <Button variant="default" className="mt-2" size="lg">
-        {/* {isChecking && <Loader2 className="w-4 h-4 mr-2 animate-spin" />} */}
-        Next <ChevronRight className="w-4 h-4 ml-2" />
-      </Button>
     </div>
   );
 };

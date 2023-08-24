@@ -33,9 +33,14 @@ export async function POST(req: Request, res: Response) {
         where: { id: questionId },
         data: { isCorrect },
       });
-      return NextResponse.json({
-        isCorrect,
-      });
+      return NextResponse.json(
+        {
+          isCorrect,
+        },
+        {
+          status: 200,
+        }
+      );
     } else if (question.questionType === "open_ended") {
     }
   } catch (error) {

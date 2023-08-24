@@ -1,3 +1,4 @@
+import axios from "axios";
 import { Configuration, OpenAIApi } from "openai";
 
 const configuration = new Configuration({
@@ -15,7 +16,7 @@ export async function strict_output(
   output_format: OutputFormat,
   default_category: string = "",
   output_value_only: boolean = false,
-  model: string = "gpt-3.5-turbo",
+  model: string = "gpt-3.5-turbo-16k-0613",
   temperature: number = 1,
   num_tries: number = 3,
   verbose: boolean = false
@@ -63,19 +64,34 @@ export async function strict_output(
     ]);
 
     console.log("-------------------------------");
+    const response = await axios.post(
+      "https://tya-gpt.top/openai/v1/chat/completions",
+      {
+        messages: [
+          {
+            role: "system",
+            content: system_prompt + output_format_prompt + error_msg,
+          },
+          { role: "user", content: user_prompt.toString() },
+        ],
+        model: model,
+        stream: false,
+        temperature: temperature,
+      }
+    );
 
     // Use OpenAI to get a response
-    const response = await openai.createChatCompletion({
-      temperature: temperature,
-      model: model,
-      messages: [
-        {
-          role: "system",
-          content: system_prompt + output_format_prompt + error_msg,
-        },
-        { role: "user", content: user_prompt.toString() },
-      ],
-    });
+    // const response = await openai.createChatCompletion({
+    //   temperature: temperature,
+    //   model: model,
+    //   messages: [
+    //     {
+    //       role: "system",
+    //       content: system_prompt + output_format_prompt + error_msg,
+    //     },
+    //     { role: "user", content: user_prompt.toString() },
+    //   ],
+    // });
 
     let res: string =
       response.data.choices[0].message?.content?.replace(/'/g, '"') ?? "";
