@@ -4,24 +4,23 @@ import { useRouter } from "next/navigation";
 import { useTheme } from "next-themes";
 import D3WordCloud from "react-d3-cloud";
 
-const data = [
-  { text: "Hey", value: 1000 },
-  { text: "lol", value: 200 },
-  { text: "first impression", value: 800 },
-  { text: "very cool", value: 1000000 },
-  { text: "duck", value: 10 },
-];
-
 const fontSizeWrapper = (word: { value: number }) =>
   Math.log2(word.value) * 5 + 16;
 
-const CustomCloudWord = () => {
+interface props {
+  formattedTopics: {
+    text: string;
+    value: number;
+  }[];
+}
+
+const CustomCloudWord: React.FC<props> = ({ formattedTopics }) => {
   const theme = useTheme();
   const router = useRouter();
 
   return (
     <D3WordCloud
-      data={data}
+      data={formattedTopics}
       height={550}
       font={"Times"}
       fontSize={fontSizeWrapper}
