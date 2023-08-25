@@ -64,6 +64,9 @@ dependencies:
   eslint-config-next:
     specifier: 13.4.19
     version: registry.npmmirror.com/eslint-config-next@13.4.19(eslint@8.47.0)(typescript@5.1.6)
+  keyword-extractor:
+    specifier: ^0.0.25
+    version: registry.npmmirror.com/keyword-extractor@0.0.25
   lucide-react:
     specifier: ^0.268.0
     version: registry.npmmirror.com/lucide-react@0.268.0(react@18.2.0)
@@ -94,6 +97,9 @@ dependencies:
   react-hook-form:
     specifier: ^7.45.4
     version: registry.npmmirror.com/react-hook-form@7.45.4(react@18.2.0)
+  string-similarity:
+    specifier: ^4.0.4
+    version: registry.npmmirror.com/string-similarity@4.0.4
   tailwind-merge:
     specifier: ^1.14.0
     version: registry.npmmirror.com/tailwind-merge@1.14.0
@@ -111,6 +117,9 @@ dependencies:
     version: registry.npmmirror.com/zod@3.21.4
 
 devDependencies:
+  '@types/string-similarity':
+    specifier: ^4.0.0
+    version: registry.npmmirror.com/@types/string-similarity@4.0.0
   prisma:
     specifier: ^5.1.1
     version: registry.npmmirror.com/prisma@5.1.1
@@ -1259,6 +1268,12 @@ packages:
     name: '@types/scheduler'
     version: 0.16.3
     dev: false
+
+  registry.npmmirror.com/@types/string-similarity@4.0.0:
+    resolution: {integrity: sha512-dMS4S07fbtY1AILG/RhuwmptmzK1Ql8scmAebOTJ/8iBtK/KI17NwGwKzu1uipjj8Kk+3mfPxum56kKZE93mzQ==, registry: http://registry.npm.taobao.org/, tarball: https://registry.npmmirror.com/@types/string-similarity/-/string-similarity-4.0.0.tgz}
+    name: '@types/string-similarity'
+    version: 4.0.0
+    dev: true
 
   registry.npmmirror.com/@typescript-eslint/parser@6.4.1(eslint@8.47.0)(typescript@5.1.6):
     resolution: {integrity: sha512-610G6KHymg9V7EqOaNBMtD1GgpAmGROsmfHJPXNLCU9bfIuLrkdOygltK784F6Crboyd5tBFayPB7Sf0McrQwg==, registry: http://registry.npm.taobao.org/, tarball: https://registry.npmmirror.com/@typescript-eslint/parser/-/parser-6.4.1.tgz}
@@ -3192,6 +3207,13 @@ packages:
       object.values: registry.npmmirror.com/object.values@1.1.6
     dev: false
 
+  registry.npmmirror.com/keyword-extractor@0.0.25:
+    resolution: {integrity: sha512-OpsjHSrHMheOEm/K5FQhkXV2wALqFemeI+yub/k2K5suhmodw7wM0RhuHHkvOKJp6m+LdKp5sVKFYf6ZtSFhrA==, registry: http://registry.npm.taobao.org/, tarball: https://registry.npmmirror.com/keyword-extractor/-/keyword-extractor-0.0.25.tgz}
+    name: keyword-extractor
+    version: 0.0.25
+    engines: {node: '>= 0.10.0'}
+    dev: false
+
   registry.npmmirror.com/language-subtag-registry@0.3.22:
     resolution: {integrity: sha512-tN0MCzyWnoz/4nHS6uxdlFWoUZT7ABptwKPQ52Ea7URk6vll88bWBVhodtnlfEuCcKWNGoc+uGbw1cwa9IKh/w==, registry: http://registry.npm.taobao.org/, tarball: https://registry.npmmirror.com/language-subtag-registry/-/language-subtag-registry-0.3.22.tgz}
     name: language-subtag-registry
@@ -4223,6 +4245,13 @@ packages:
     name: streamsearch
     version: 1.1.0
     engines: {node: '>=10.0.0'}
+    dev: false
+
+  registry.npmmirror.com/string-similarity@4.0.4:
+    resolution: {integrity: sha512-/q/8Q4Bl4ZKAPjj8WerIBJWALKkaPRfrvhfF8k/B23i4nzrlRj2/go1m90In7nG/3XDSbOo0+pu6RvCTM9RGMQ==, registry: http://registry.npm.taobao.org/, tarball: https://registry.npmmirror.com/string-similarity/-/string-similarity-4.0.4.tgz}
+    name: string-similarity
+    version: 4.0.4
+    deprecated: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
     dev: false
 
   registry.npmmirror.com/string.prototype.matchall@4.0.8:
