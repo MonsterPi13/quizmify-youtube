@@ -55,17 +55,17 @@ export async function strict_output(
       output_format_prompt += `\nGenerate a list of json, one json for each input element.`;
     }
 
-    console.log("[request]", [
-      {
-        role: "system",
-        content: system_prompt + output_format_prompt + error_msg,
-      },
-      { role: "user", content: user_prompt.toString() },
-    ]);
+    // console.log("[request]", [
+    //   {
+    //     role: "system",
+    //     content: system_prompt + output_format_prompt + error_msg,
+    //   },
+    //   { role: "user", content: user_prompt.toString() },
+    // ]);
 
-    console.log("-------------------------------");
+    // console.log("-------------------------------");
     const response = await axios.post(
-      "https://tya-gpt.top/openai/v1/chat/completions",
+      `${process.env.OPEN_API_URL}/openai/v1/chat/completions`,
       {
         messages: [
           {

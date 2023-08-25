@@ -111,6 +111,7 @@ const MCQ: React.FC<Props> = ({ game }) => {
         }
 
         setQuestionIndex((questionIndex) => questionIndex + 1);
+        setSelectedChoice(-1);
       },
     });
   }, [
