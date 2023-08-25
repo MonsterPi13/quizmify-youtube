@@ -18,7 +18,7 @@ import {
 } from "@/components/ui/card";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
-import { checkAnswerSchema } from "@/schemas/questions";
+import { checkAnswerSchema, endGameSchema } from "@/schemas/questions";
 import BlankAnswerInput from "@/components/BlankAnswerInput";
 import OpenEndedPercentage from "@/components/OpenEndedPercentage";
 
@@ -34,6 +34,16 @@ const OpenEnded: React.FC<Props> = ({ game }) => {
   const currentQuestion = useMemo(() => {
     return game.questions[questionIndex];
   }, [questionIndex, game.questions]);
+  const { mutate: endGame } = useMutation({
+    mutationFn: async () => {
+      const payload: z.infer<typeof endGameSchema> = {
+        gameId: game.id,
+      };
+      const response = await axios.post(`/api/endGame`, payload);
+      return response.data;
+    },
+  });
+
   const { toast } = useToast();
   const [now, setNow] = useState(new Date());
   const { mutate: checkAnswer, isLoading: isChecking } = useMutation({
@@ -73,7 +83,7 @@ const OpenEnded: React.FC<Props> = ({ game }) => {
           return (prev + percentageSimilar) / (questionIndex + 1);
         });
         if (questionIndex === game.questions.length - 1) {
-          // endGame();
+          endGame();
           setHasEnded(true);
           return;
         }
@@ -87,7 +97,7 @@ const OpenEnded: React.FC<Props> = ({ game }) => {
         });
       },
     });
-  }, [checkAnswer, questionIndex, toast, game.questions.length]);
+  }, [checkAnswer, questionIndex, endGame, toast, game.questions.length]);
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       const key = event.key;

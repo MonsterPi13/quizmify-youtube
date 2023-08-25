@@ -6,7 +6,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { BookOpen, CopyCheck } from "lucide-react";
 import { useMutation } from "@tanstack/react-query";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 
 import {
   Card,
@@ -28,6 +28,9 @@ import { quizCreationSchema } from "@/schemas/QuizCreation";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import LoadingQuestions from "@/components/LoadingQuestions";
+import { toast } from "@/components/ui/use-toast";
+import { useState } from "react";
 
 type Input = z.infer<typeof quizCreationSchema>;
 
@@ -37,6 +40,8 @@ type Props = {
 
 const QuizCreation: React.FC<Props> = ({ topic: topicParam }) => {
   const router = useRouter();
+  const [showLoader, setShowLoader] = useState(false);
+  const [finishedLoading, setFinishedLoading] = useState(false);
   const { mutate: getQuestions, isLoading } = useMutation({
     mutationFn: async ({ type, amount, topic }: Input) => {
       const response = await axios.post("/api/game", {
@@ -58,6 +63,7 @@ const QuizCreation: React.FC<Props> = ({ topic: topicParam }) => {
   });
 
   const onSubmit = async (input: Input) => {
+    setShowLoader(true);
     getQuestions(
       {
         amount: input.amount,
@@ -66,10 +72,25 @@ const QuizCreation: React.FC<Props> = ({ topic: topicParam }) => {
       },
       {
         onSuccess: ({ gameId }) => {
-          if (input.type === "open_ended") {
-            router.push(`/play/open-ended/${gameId}`);
-          } else {
-            router.push(`/play/mcq/${gameId}`);
+          setFinishedLoading(true);
+          setTimeout(() => {
+            if (form.getValues("type") === "mcq") {
+              router.push(`/play/mcq/${gameId}`);
+            } else if (form.getValues("type") === "open_ended") {
+              router.push(`/play/open-ended/${gameId}`);
+            }
+          }, 2000);
+        },
+        onError: (error) => {
+          setShowLoader(false);
+          if (error instanceof AxiosError) {
+            if (error.response?.status === 500) {
+              toast({
+                title: "Error",
+                description: "Something went wrong. Please try again later.",
+                variant: "destructive",
+              });
+            }
           }
         },
       }
@@ -77,6 +98,10 @@ const QuizCreation: React.FC<Props> = ({ topic: topicParam }) => {
   };
 
   form.watch();
+
+  if (showLoader) {
+    return <LoadingQuestions finished={finishedLoading} />;
+  }
 
   return (
     <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">

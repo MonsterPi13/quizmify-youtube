@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/card";
 import { Button, buttonVariants } from "@/components/ui/button";
 import MCQCounter from "@/components/MCQCounter";
-import { checkAnswerSchema } from "@/schemas/questions";
+import { checkAnswerSchema, endGameSchema } from "@/schemas/questions";
 import { useToast } from "@/components/ui/use-toast";
 import { cn, formatTimeDelta } from "@/lib/utils";
 
@@ -58,6 +58,16 @@ const MCQ: React.FC<Props> = ({ game }) => {
     },
   });
 
+  const { mutate: endGame } = useMutation({
+    mutationFn: async () => {
+      const payload: z.infer<typeof endGameSchema> = {
+        gameId: game.id,
+      };
+      const response = await axios.post(`/api/endGame`, payload);
+      return response.data;
+    },
+  });
+
   useEffect(() => {
     const interval = setInterval(() => {
       if (!hasEnded) {
@@ -94,10 +104,23 @@ const MCQ: React.FC<Props> = ({ game }) => {
           });
         }
 
+        if (questionIndex === game.questions.length - 1) {
+          endGame();
+          setHasEnded(true);
+          return;
+        }
+
         setQuestionIndex((questionIndex) => questionIndex + 1);
       },
     });
-  }, [checkAnswer, toast, isChecking]);
+  }, [
+    checkAnswer,
+    toast,
+    isChecking,
+    questionIndex,
+    endGame,
+    game.questions.length,
+  ]);
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
